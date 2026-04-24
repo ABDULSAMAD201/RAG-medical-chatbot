@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Medical Chatbot</title>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --panel: rgba(255, 255, 255, 0.9);
+            --border: rgba(15, 23, 42, 0.08);
+            --text: #122033;
+            --muted: #667085;
+            --brand: #0f766e;
+            --brand-soft: rgba(15, 118, 110, 0.12);
+            --shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, #f8fbfc 0%, var(--bg) 100%);
+        }
+        .shell { width: min(920px, calc(100% - 24px)); margin: 18px auto; }
+        .title-bar {
+            display: inline-flex; align-items: center; gap: 10px;
+            margin-bottom: 16px; padding: 10px 14px; border-radius: 999px;
+            background: var(--brand-soft); color: var(--brand);
+            font-size: 0.9rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+        }
+        .title-bar::before { content: ''; width: 8px; height: 8px; border-radius: 999px; background: var(--brand); }
+        .panel { overflow: hidden; border: 1px solid var(--border); border-radius: 24px; background: var(--panel); box-shadow: var(--shadow); }
+        .panel-header { padding: 18px 20px; border-bottom: 1px solid var(--border); }
+        .panel-header strong { display: block; font-size: 1.1rem; line-height: 1.2; }
+        .panel-header span { display: block; margin-top: 4px; color: var(--muted); font-size: 0.94rem; }
+        .chat-box { display: grid; gap: 12px; padding: 20px; }
+        .message { width: fit-content; max-width: min(78%, 720px); padding: 14px 16px; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 18px; }
+        .message strong { display: inline-block; margin-bottom: 6px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
+        .user { margin-left: auto; background: #dff2ef; }
+        .assistant { margin-right: auto; background: #ffffff; }
+        .error { margin: 0 0 16px; padding: 12px 14px; border: 1px solid rgba(239, 68, 68, 0.18); border-radius: 14px; background: rgba(254, 226, 226, 0.8); color: #991b1b; font-weight: 600; }
+        .empty-state { padding: 4px 2px; color: var(--muted); }
+        .empty-state strong { display: block; margin-bottom: 6px; color: var(--text); }
+        .composer { padding: 18px 20px 20px; border-top: 1px solid var(--border); }
+        textarea { width: 100%; min-height: 96px; resize: vertical; padding: 14px 16px; border: 1px solid rgba(15, 118, 110, 0.16); border-radius: 16px; font: inherit; font-size: 1rem; outline: none; background: #fff; }
+        textarea:focus { border-color: rgba(15, 118, 110, 0.42); box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12); }
+        .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; margin-top: 12px; }
+        .hint { color: var(--muted); font-size: 0.92rem; }
+        button { border: 0; border-radius: 14px; padding: 12px 18px; font: inherit; font-weight: 700; cursor: pointer; }
+        .send-btn { color: #fff; background: linear-gradient(135deg, var(--brand) 0%, #059669 100%); }
+        .clear-btn { color: var(--text); background: #fff; border: 1px solid var(--border); }
+        @media (max-width: 720px) {
+            .shell { width: min(100% - 16px, 920px); margin: 12px auto; }
+            .message { max-width: 100%; }
+            .actions { flex-direction: column; align-items: stretch; }
+            .send-btn, .clear-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <div class="title-bar">AI Medical Chatbot</div>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <section class="panel">
+            <div class="panel-header">
+                <strong>Conversation</strong>
+                <span>Ask a question to start the chat.</span>
+            </div>
+            <div class="chat-box">
+                {% if messages %}
+                    {% for msg in messages %}
+                        <div class="message {{ msg.role }}">
+                            <strong>{{ msg.role|capitalize }}</strong><br />
+                            {{ msg.content | safe | nl2br }}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <strong>No messages yet.</strong>
+                        <span>Type a question below to begin.</span>
+                    </div>
+                {% endif %}
+            </div>
+            <form class="composer" method="post" action="{{ url_for('index') }}">
+                <textarea name="prompt" placeholder="Ask a medical question..." required></textarea>
+                <div class="actions">
+                    <span class="hint">Keep it specific for the best answer.</span>
+                    <div>
+                        <button type="submit" class="send-btn">Send</button>
+                    </div>
+                </div>
+            </form>
+            <form method="get" action="{{ url_for('clear') }}" style="padding: 0 20px 20px;">
+                <button type="submit" class="clear-btn">Clear Chat</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
